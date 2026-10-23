@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "token-usage"
+version = "0.1.0"
+description = "A plugin-based CLI for tracking LLM token usage and estimating cost."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "token-usage contributors" }]
+keywords = ["llm", "token", "usage", "cost", "cli"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+token-usage = "token_usage.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["token_usage*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

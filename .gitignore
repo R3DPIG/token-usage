@@ -1,0 +1,21 @@
+.idea/misc.xml
+.idea/modules.xml
+.idea/token-usage.iml
+.idea/vcs.xml
+.idea/workspace.xml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data produced by the CLI (keep the directory, ignore its contents)
+/output/*
+!/output/.gitkeep
