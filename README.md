@@ -47,6 +47,22 @@ token_usage/
 | `pricing` | 查看/编辑模型单价 |
 | `export` | 导出 CSV / JSON |
 | `sample` | 生成确定性的演示数据 |
+| `import` | 导入厂商用量导出（OpenAI / Anthropic / 通用 JSON·CSV，自动识别格式） |
+| `compare` | 当前周期 vs 上一周期（等长窗口，月中对比也公平） |
+| `anomaly` | 按 z-score 标记花费异常日（spike / dip） |
+| `tags` | 标签清单与各标签花费，并提示未打标签的记录 |
+| `doctor` | 一次性全量体检：完整性、集中度、模型效率、浪费、异常、预算 |
+
+## 迭代记录
+
+**第 1 次**：核心层 + 9 个基础命令（record/list/report/stats/forecast/budget/pricing/export/sample）。
+
+**第 2 次**（本次，+980 行）：新增数据导入与洞察能力，**未改动任何既有核心逻辑**。
+
+- 新增 `ingest.py`：把厂商导出解析为 `UsageRecord`，三种格式 + 自动识别 + 容错（坏行跳过并计数，不中断）。
+- 新增 `insights.py`：异常检测、周期对比、模型单位经济性、花费集中度、浪费估算。
+- 新增 5 个插件：`import` / `compare` / `anomaly` / `tags` / `doctor`。
+- 唯一改动是 `plugins/__init__.py` 的 `_BUILTIN_MODULES` 追加 5 行 —— 这正是设计好的扩展点。
 
 ## 如何迭代（第二条要求）
 

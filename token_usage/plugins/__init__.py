@@ -21,6 +21,12 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.pricing",
     "token_usage.plugins.stats",
     "token_usage.plugins.sample",
+    # Iteration 2: data ingestion and derived insights.
+    "token_usage.plugins.import_usage",
+    "token_usage.plugins.compare",
+    "token_usage.plugins.anomaly",
+    "token_usage.plugins.tags",
+    "token_usage.plugins.doctor",
 )
 
 
