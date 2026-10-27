@@ -52,17 +52,29 @@ token_usage/
 | `anomaly` | 按 z-score 标记花费异常日（spike / dip） |
 | `tags` | 标签清单与各标签花费，并提示未打标签的记录 |
 | `doctor` | 一次性全量体检：完整性、集中度、模型效率、浪费、异常、预算 |
+| `dedupe` | 去除重复记录（默认 dry-run，`--apply` 才落盘） |
+| `prune` | 按条件删除记录（无参数时拒绝执行，防误删） |
+| `edit` | 按索引修正单条记录，改动前展示 diff |
+| `merge` | 合并另一个 workspace 或归档到当前库 |
+| `archive` | 把旧记录移入归档 / 恢复 / 删除归档 |
 
 ## 迭代记录
 
 **第 1 次**：核心层 + 9 个基础命令（record/list/report/stats/forecast/budget/pricing/export/sample）。
 
-**第 2 次**（本次，+980 行）：新增数据导入与洞察能力，**未改动任何既有核心逻辑**。
+**第 2 次**（+980 行）：新增数据导入与洞察能力，**未改动任何既有核心逻辑**。
 
 - 新增 `ingest.py`：把厂商导出解析为 `UsageRecord`，三种格式 + 自动识别 + 容错（坏行跳过并计数，不中断）。
 - 新增 `insights.py`：异常检测、周期对比、模型单位经济性、花费集中度、浪费估算。
 - 新增 5 个插件：`import` / `compare` / `anomaly` / `tags` / `doctor`。
 - 唯一改动是 `plugins/__init__.py` 的 `_BUILTIN_MODULES` 追加 5 行 —— 这正是设计好的扩展点。
+
+**第 3 次**（本次，+1020 行）：新增数据生命周期治理，**未改动任何既有核心逻辑**。
+
+- 新增 `maintenance.py`：去重指纹、条件清理、字段编辑（重建校验）、多源合并、完整性扫描。
+- `storage.py` 追加归档读写（`write_archive` / `read_archive` / `list_archives` / `delete_archive`），复用既有的「写临时文件再 rename」原子模式。
+- 新增 5 个插件：`dedupe` / `prune` / `edit` / `merge` / `archive`。
+- **安全设计**：所有破坏性操作默认 dry-run，必须显式 `--apply` 才落盘；`prune` 无任何条件时直接拒绝执行。
 
 ## 如何迭代（第二条要求）
 

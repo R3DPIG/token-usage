@@ -27,6 +27,12 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.anomaly",
     "token_usage.plugins.tags",
     "token_usage.plugins.doctor",
+    # Iteration 3: data lifecycle governance.
+    "token_usage.plugins.dedupe",
+    "token_usage.plugins.prune",
+    "token_usage.plugins.edit",
+    "token_usage.plugins.merge",
+    "token_usage.plugins.archive",
 )
 
 

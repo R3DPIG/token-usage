@@ -125,3 +125,54 @@ class JsonStore:
         self.budgets_path.write_text(
             json.dumps([b.to_dict() for b in budgets], indent=2, ensure_ascii=False),
             encoding="utf-8")
+
+    # -- archives ---------------------------------------------------------
+    @property
+    def archive_dir(self) -> Path:
+        return self.home / "archive"
+
+    def archive_path(self, label: str) -> Path:
+        """Path of a named archive file, e.g. ``archive/2024-05.jsonl``."""
+        safe = "".join(ch if ch.isalnum() or ch in "-_." else "_" for ch in label)
+        return self.archive_dir / f"{safe}.jsonl"
+
+    def list_archives(self) -> List[str]:
+        """Names (without extension) of existing archives, sorted."""
+        if not self.archive_dir.is_dir():
+            return []
+        return sorted(path.stem for path in self.archive_dir.glob("*.jsonl"))
+
+    def write_archive(self, label: str, records: List[UsageRecord]) -> Path:
+        """Write records to a named archive, replacing any existing one."""
+        self.archive_dir.mkdir(parents=True, exist_ok=True)
+        path = self.archive_path(label)
+        tmp = path.with_suffix(".jsonl.tmp")
+        with tmp.open("w", encoding="utf-8") as fh:
+            for record in records:
+                fh.write(json.dumps(record.to_dict(), ensure_ascii=False) + "\n")
+        tmp.replace(path)
+        return path
+
+    def read_archive(self, label: str) -> List[UsageRecord]:
+        """Load records from a named archive; empty list when it does not exist."""
+        path = self.archive_path(label)
+        if not path.exists():
+            return []
+        records = []
+        with path.open("r", encoding="utf-8") as fh:
+            for raw in fh:
+                raw = raw.strip()
+                if not raw:
+                    continue
+                try:
+                    records.append(UsageRecord.from_dict(json.loads(raw)))
+                except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+                    continue
+        return records
+
+    def delete_archive(self, label: str) -> bool:
+        path = self.archive_path(label)
+        if path.exists():
+            path.unlink()
+            return True
+        return False
