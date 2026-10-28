@@ -26,6 +26,7 @@ DEFAULT_HOME = ".token-usage"
 USAGE_FILE = "usage.jsonl"
 PRICING_FILE = "pricing.json"
 BUDGETS_FILE = "budgets.json"
+CONFIG_FILE = "config.json"
 
 
 def resolve_home(explicit: Optional[str] = None) -> Path:
@@ -57,6 +58,10 @@ class JsonStore:
     @property
     def budgets_path(self) -> Path:
         return self.home / BUDGETS_FILE
+
+    @property
+    def config_path(self) -> Path:
+        return self.home / CONFIG_FILE
 
     # -- usage records ----------------------------------------------------
     def append_record(self, record: UsageRecord) -> None:
@@ -176,3 +181,19 @@ class JsonStore:
             path.unlink()
             return True
         return False
+
+    # -- configuration ----------------------------------------------------
+    def load_config(self) -> "Config":
+        """Load the config document, tolerating a missing or corrupt file."""
+        from token_usage.config import Config
+
+        if not self.config_path.exists():
+            return Config()
+        try:
+            return Config.from_dict(json.loads(self.config_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, TypeError):
+            return Config()
+
+    def save_config(self, config: "Config") -> None:
+        self.config_path.write_text(
+            json.dumps(config.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8")

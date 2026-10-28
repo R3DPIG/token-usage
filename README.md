@@ -57,6 +57,8 @@ token_usage/
 | `edit` | 按索引修正单条记录，改动前展示 diff |
 | `merge` | 合并另一个 workspace 或归档到当前库 |
 | `archive` | 把旧记录移入归档 / 恢复 / 删除归档 |
+| `config` | 查看/编辑工作区默认值（如默认 project、group） |
+| `preset` | 保存/回放命名选项组合，长命令变短命令 |
 
 ## 迭代记录
 
@@ -69,12 +71,20 @@ token_usage/
 - 新增 5 个插件：`import` / `compare` / `anomaly` / `tags` / `doctor`。
 - 唯一改动是 `plugins/__init__.py` 的 `_BUILTIN_MODULES` 追加 5 行 —— 这正是设计好的扩展点。
 
-**第 3 次**（本次，+1020 行）：新增数据生命周期治理，**未改动任何既有核心逻辑**。
+**第 3 次**（+1020 行）：新增数据生命周期治理，**未改动任何既有核心逻辑**。
 
 - 新增 `maintenance.py`：去重指纹、条件清理、字段编辑（重建校验）、多源合并、完整性扫描。
 - `storage.py` 追加归档读写（`write_archive` / `read_archive` / `list_archives` / `delete_archive`），复用既有的「写临时文件再 rename」原子模式。
 - 新增 5 个插件：`dedupe` / `prune` / `edit` / `merge` / `archive`。
 - **安全设计**：所有破坏性操作默认 dry-run，必须显式 `--apply` 才落盘；`prune` 无任何条件时直接拒绝执行。
+
+**第 4 次**（本次，+816 行）：新增配置与预设能力。
+
+- 新增 `config.py`：默认值校验（类型 + 枚举白名单）、预设 CRUD、容错反序列化（坏配置行跳过而非报错）。
+- `storage.py` 恢复 `load_config` / `save_config`；`registry.PluginContext` 增加惰性 `config` 属性。
+- `cli.py` 新增 `_resolve_options`：展开 `--preset` 并合并默认值。
+- 新增 2 个插件：`config` / `preset`。
+- **优先级设计**：配置默认值 < preset < 显式 CLI 参数。显式参数永远最高，所以一次性覆盖不会被配置挡住。
 
 ## 如何迭代（第二条要求）
 

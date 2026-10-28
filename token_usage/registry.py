@@ -24,10 +24,19 @@ class PluginContext:
     core and plugin, which keeps plugins testable)."""
 
     def __init__(self, store: JsonStore, catalog: PricingCatalog,
-                 args: "PluginArgs") -> None:
+                 args: "PluginArgs", config=None) -> None:
         self.store = store
         self.catalog = catalog
         self.args = args
+        # Loaded lazily so a plugin that never touches config pays nothing.
+        self._config = config
+
+    @property
+    def config(self):
+        """The workspace configuration (defaults + presets)."""
+        if self._config is None:
+            self._config = self.store.load_config()
+        return self._config
 
     def records(self):
         """All stored usage records, loaded on demand."""

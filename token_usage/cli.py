@@ -87,9 +87,17 @@ def parse_argv(argv: List[str]) -> Tuple[str, Dict[str, object], List[str], Dict
     return command, {k.replace("-", "_"): v for k, v in options.items()}, positionals, globals_
 
 
-def build_context(home: str, args: PluginArgs) -> PluginContext:
-    store = JsonStore(resolve_home(home) if home else resolve_home())
-    return PluginContext(store, store.load_pricing(), args)
+def apply_config_defaults(store: JsonStore, options: Dict[str, object]) -> Dict[str, object]:
+    """Fill in configured defaults for options the user did not pass.
+
+    Explicit CLI options always win. A corrupt or absent config yields the
+    options unchanged, so this can never break a command.
+    """
+    try:
+        config = store.load_config()
+    except Exception:  # noqa: BLE001 - config must never block a command
+        return options
+    return config.merge_into(options)
 
 
 def _print_help() -> int:
@@ -98,6 +106,7 @@ def _print_help() -> int:
     print(registry.render_help())
     print("\nglobal options:\n"
           "  --home <path>   workspace root (default: .token-usage)\n"
+          "  --preset <name> replay a saved option bundle\n"
           "  --version       print version\n"
           "  -h, --help      show this help")
     print("\nenvironment:\n"
@@ -142,7 +151,9 @@ def main(argv: List[str] | None = None) -> int:
         print(registry.render_help(), file=sys.stderr)
         return 127
 
-    ctx = build_context(globals_.get("home", ""), PluginArgs(options, positionals))
+    store = JsonStore(resolve_home(globals_.get("home", "")))
+    options = _resolve_options(store, options)
+    ctx = PluginContext(store, store.load_pricing(), PluginArgs(options, positionals))
     try:
         return plugin.run(ctx)
     except KeyboardInterrupt:  # pragma: no cover - interactive
@@ -151,6 +162,26 @@ def main(argv: List[str] | None = None) -> int:
     except Exception as exc:  # noqa: BLE001 - a plugin bug must not leak a traceback
         print(f"error: command {command!r} failed: {exc}", file=sys.stderr)
         return 1
+
+
+def _resolve_options(store: JsonStore, options: Dict[str, object]) -> Dict[str, object]:
+    """Expand ``--preset <name>`` then fill in configured defaults.
+
+    Precedence, lowest to highest: configured defaults < preset < explicit CLI
+    options. A missing preset is reported but does not abort the command, since
+    the user may simply have mistyped the name.
+    """
+    preset_name = options.pop("preset", None)
+    if preset_name:
+        preset = store.load_config().get_preset(str(preset_name))
+        if preset is None:
+            print(f"warning: preset {preset_name!r} not found; ignoring",
+                  file=sys.stderr)
+        else:
+            merged = dict(preset.options)
+            merged.update(options)
+            options = merged
+    return apply_config_defaults(store, options)
 
 
 if __name__ == "__main__":  # pragma: no cover

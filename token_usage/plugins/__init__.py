@@ -33,6 +33,9 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.edit",
     "token_usage.plugins.merge",
     "token_usage.plugins.archive",
+    # Iteration 4: configuration and presets.
+    "token_usage.plugins.config",
+    "token_usage.plugins.preset",
 )
 
 
