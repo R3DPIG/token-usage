@@ -59,6 +59,7 @@ token_usage/
 | `archive` | 把旧记录移入归档 / 恢复 / 删除归档 |
 | `config` | 查看/编辑工作区默认值（如默认 project、group） |
 | `preset` | 保存/回放命名选项组合，长命令变短命令 |
+| `alert` | 声明式告警规则：定义条件、检查、可作 CI 门禁 |
 
 ## 迭代记录
 
@@ -78,13 +79,20 @@ token_usage/
 - 新增 5 个插件：`dedupe` / `prune` / `edit` / `merge` / `archive`。
 - **安全设计**：所有破坏性操作默认 dry-run，必须显式 `--apply` 才落盘；`prune` 无任何条件时直接拒绝执行。
 
-**第 4 次**（本次，+816 行）：新增配置与预设能力。
+**第 4 次**（+816 行）：新增配置与预设能力。
 
 - 新增 `config.py`：默认值校验（类型 + 枚举白名单）、预设 CRUD、容错反序列化（坏配置行跳过而非报错）。
 - `storage.py` 恢复 `load_config` / `save_config`；`registry.PluginContext` 增加惰性 `config` 属性。
 - `cli.py` 新增 `_resolve_options`：展开 `--preset` 并合并默认值。
 - 新增 2 个插件：`config` / `preset`。
 - **优先级设计**：配置默认值 < preset < 显式 CLI 参数。显式参数永远最高，所以一次性覆盖不会被配置挡住。
+
+**第 5 次**（本次，+948 行）：新增声明式告警规则引擎。
+
+- 新增 `alerts.py`：`Rule` 数据模型（7 种指标 × 4 种比较符 × 5 种维度）、评估引擎、严重度排序、CI 退出码映射。
+- `storage.py` 追加 `load_alerts` / `save_alerts`。
+- 新增 1 个插件：`alert`（规则 CRUD + `check`）。
+- **关键设计**：规则是**数据不是代码**，存于 `alerts.json` 可手改；无数据时状态为 `unknown` 而非 `ok`，避免数据缺口伪装成通过。
 
 ## 如何迭代（第二条要求）
 

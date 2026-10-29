@@ -27,6 +27,7 @@ USAGE_FILE = "usage.jsonl"
 PRICING_FILE = "pricing.json"
 BUDGETS_FILE = "budgets.json"
 CONFIG_FILE = "config.json"
+ALERTS_FILE = "alerts.json"
 
 
 def resolve_home(explicit: Optional[str] = None) -> Path:
@@ -62,6 +63,10 @@ class JsonStore:
     @property
     def config_path(self) -> Path:
         return self.home / CONFIG_FILE
+
+    @property
+    def alerts_path(self) -> Path:
+        return self.home / ALERTS_FILE
 
     # -- usage records ----------------------------------------------------
     def append_record(self, record: UsageRecord) -> None:
@@ -197,3 +202,21 @@ class JsonStore:
     def save_config(self, config: "Config") -> None:
         self.config_path.write_text(
             json.dumps(config.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # -- alert rules ------------------------------------------------------
+    def load_alerts(self) -> List["Rule"]:
+        """Load alert rules, skipping malformed entries."""
+        from token_usage.alerts import load_rules
+
+        if not self.alerts_path.exists():
+            return []
+        try:
+            return load_rules(json.loads(self.alerts_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def save_alerts(self, rules: List["Rule"]) -> None:
+        from token_usage.alerts import dump_rules
+
+        self.alerts_path.write_text(
+            json.dumps(dump_rules(rules), indent=2, ensure_ascii=False), encoding="utf-8")

@@ -36,6 +36,8 @@ _BUILTIN_MODULES = (
     # Iteration 4: configuration and presets.
     "token_usage.plugins.config",
     "token_usage.plugins.preset",
+    # Iteration 5: declarative alert rules.
+    "token_usage.plugins.alert",
 )
 
 
