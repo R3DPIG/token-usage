@@ -38,6 +38,9 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.preset",
     # Iteration 5: declarative alert rules.
     "token_usage.plugins.alert",
+    # Iteration 6: forward-looking budget planning.
+    "token_usage.plugins.plan",
+    "token_usage.plugins.quota",
 )
 
 
