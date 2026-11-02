@@ -41,6 +41,8 @@ _BUILTIN_MODULES = (
     # Iteration 6: forward-looking budget planning.
     "token_usage.plugins.plan",
     "token_usage.plugins.quota",
+    # Iteration 7: temporal pattern analysis.
+    "token_usage.plugins.pattern",
 )
 
 
