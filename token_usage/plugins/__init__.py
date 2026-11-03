@@ -43,6 +43,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.quota",
     # Iteration 7: temporal pattern analysis.
     "token_usage.plugins.pattern",
+    # Iteration 8: quantified cost optimisation.
+    "token_usage.plugins.optimize",
 )
 
 
