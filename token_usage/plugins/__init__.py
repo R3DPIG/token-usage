@@ -45,6 +45,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.pattern",
     # Iteration 8: quantified cost optimisation.
     "token_usage.plugins.optimize",
+    # Iteration 9: cost attribution and chargeback.
+    "token_usage.plugins.chargeback",
 )
 
 

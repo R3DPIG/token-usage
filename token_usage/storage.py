@@ -9,6 +9,7 @@ their own JSON documents. Layout under the workspace root (``--home`` or
       usage.jsonl     # append-only usage records
       pricing.json    # pricing catalog override (optional)
       budgets.json    # list of budgets (optional)
+      owners.json     # cost attribution rules (optional)
       plugins/        # drop-in external plugins (*.py)
 """
 
@@ -28,6 +29,7 @@ PRICING_FILE = "pricing.json"
 BUDGETS_FILE = "budgets.json"
 CONFIG_FILE = "config.json"
 ALERTS_FILE = "alerts.json"
+OWNERS_FILE = "owners.json"
 
 
 def resolve_home(explicit: Optional[str] = None) -> Path:
@@ -67,6 +69,10 @@ class JsonStore:
     @property
     def alerts_path(self) -> Path:
         return self.home / ALERTS_FILE
+
+    @property
+    def owners_path(self) -> Path:
+        return self.home / OWNERS_FILE
 
     # -- usage records ----------------------------------------------------
     def append_record(self, record: UsageRecord) -> None:
@@ -219,4 +225,22 @@ class JsonStore:
         from token_usage.alerts import dump_rules
 
         self.alerts_path.write_text(
+            json.dumps(dump_rules(rules), indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # -- owner rules ------------------------------------------------------
+    def load_owners(self) -> List["OwnerRule"]:
+        """Load attribution rules, skipping malformed entries."""
+        from token_usage.attribution import load_rules
+
+        if not self.owners_path.exists():
+            return []
+        try:
+            return load_rules(json.loads(self.owners_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def save_owners(self, rules: List["OwnerRule"]) -> None:
+        from token_usage.attribution import dump_rules
+
+        self.owners_path.write_text(
             json.dumps(dump_rules(rules), indent=2, ensure_ascii=False), encoding="utf-8")
