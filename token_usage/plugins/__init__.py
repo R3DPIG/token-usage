@@ -49,6 +49,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.chargeback",
     # Iteration 10: spend change decomposition.
     "token_usage.plugins.drivers",
+    # Iteration 11: probabilistic period-end simulation.
+    "token_usage.plugins.simulate",
 )
 
 
