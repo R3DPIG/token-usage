@@ -51,6 +51,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.drivers",
     # Iteration 11: probabilistic period-end simulation.
     "token_usage.plugins.simulate",
+    # Iteration 12: dataset quality scoring and remediation worklist.
+    "token_usage.plugins.quality",
 )
 
 
