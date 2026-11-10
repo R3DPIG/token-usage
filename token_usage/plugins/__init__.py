@@ -53,6 +53,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.simulate",
     # Iteration 12: dataset quality scoring and remediation worklist.
     "token_usage.plugins.quality",
+    # Iteration 13: cross-workspace peer benchmarking.
+    "token_usage.plugins.peers",
 )
 
 
