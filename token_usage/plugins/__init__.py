@@ -55,6 +55,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.quality",
     # Iteration 13: cross-workspace peer benchmarking.
     "token_usage.plugins.peers",
+    # Iteration 14: provider bill reconciliation.
+    "token_usage.plugins.reconcile",
 )
 
 
