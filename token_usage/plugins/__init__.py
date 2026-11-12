@@ -57,6 +57,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.peers",
     # Iteration 14: provider bill reconciliation.
     "token_usage.plugins.reconcile",
+    # Iteration 15: spending envelope allocation and review.
+    "token_usage.plugins.envelope",
 )
 
 

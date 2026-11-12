@@ -10,6 +10,7 @@ their own JSON documents. Layout under the workspace root (``--home`` or
       pricing.json    # pricing catalog override (optional)
       budgets.json    # list of budgets (optional)
       owners.json     # cost attribution rules (optional)
+      envelopes.json  # spending envelopes for post-hoc review (optional)
       plugins/        # drop-in external plugins (*.py)
 """
 
@@ -30,6 +31,7 @@ BUDGETS_FILE = "budgets.json"
 CONFIG_FILE = "config.json"
 ALERTS_FILE = "alerts.json"
 OWNERS_FILE = "owners.json"
+ENVELOPES_FILE = "envelopes.json"
 
 
 def resolve_home(explicit: Optional[str] = None) -> Path:
@@ -73,6 +75,10 @@ class JsonStore:
     @property
     def owners_path(self) -> Path:
         return self.home / OWNERS_FILE
+
+    @property
+    def envelopes_path(self) -> Path:
+        return self.home / ENVELOPES_FILE
 
     # -- usage records ----------------------------------------------------
     def append_record(self, record: UsageRecord) -> None:
@@ -244,3 +250,23 @@ class JsonStore:
 
         self.owners_path.write_text(
             json.dumps(dump_rules(rules), indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # -- spending envelopes -----------------------------------------------
+    def load_envelopes(self) -> List["Envelope"]:
+        """Load spending envelopes, skipping malformed entries."""
+        from token_usage.envelope import load_envelopes
+
+        if not self.envelopes_path.exists():
+            return []
+        try:
+            return load_envelopes(
+                json.loads(self.envelopes_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    def save_envelopes(self, envelopes: List["Envelope"]) -> None:
+        from token_usage.envelope import dump_envelopes
+
+        self.envelopes_path.write_text(
+            json.dumps(dump_envelopes(envelopes), indent=2, ensure_ascii=False),
+            encoding="utf-8")
