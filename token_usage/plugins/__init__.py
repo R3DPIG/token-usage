@@ -59,6 +59,8 @@ _BUILTIN_MODULES = (
     "token_usage.plugins.reconcile",
     # Iteration 15: spending envelope allocation and review.
     "token_usage.plugins.envelope",
+    # Iteration 16: forecast error backtesting.
+    "token_usage.plugins.backtest",
 )
 
 
